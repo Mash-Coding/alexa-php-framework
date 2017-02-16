@@ -3,7 +3,9 @@
 
     use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
     use MashCoding\AlexaPHPFramework\helper\ArrayHelper;
+    use MashCoding\AlexaPHPFramework\helper\FileHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
+    use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
 
     class Request extends JSONObject
     {
@@ -115,11 +117,19 @@
         /**
          * parses either stdin or given $input and creates a appropriate response
          *
-         * @param null|string $input manual override for default PHP STDIN
+         * @param null|string $configFile    path to a JSON-config file
+         * @param null|string $stdinOverride manual override for default PHP STDIN
          */
-        public static function parse ($input = null)
+        public static function run ($configFile = null, $stdinOverride = null)
         {
-            $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($input);
+            if (!isset($configFile))
+                $configFile = '/config/alexa.json';
+
+            $settings = SettingsHelper::parseConfig($configFile);
+
+            var_dump($settings); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
+
+            $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
             $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
 
             try {
