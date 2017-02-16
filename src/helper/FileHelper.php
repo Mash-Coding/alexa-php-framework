@@ -5,7 +5,12 @@
     {
         public static function getRoot ()
         {
-            return realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
+            return realpath($_SERVER['DOCUMENT_ROOT'] . '/../') . "/";
+        }
+
+        public static function getRelativePath ($path)
+        {
+            return str_replace(self::getRoot(), "/", realpath($path) . "/");
         }
 
         public static function parseJSON ($file)
@@ -13,7 +18,7 @@
             return json_decode(self::getFileContents($file, '{}'), true);
         }
 
-        public static function getFileContents ($file, $fallback)
+        public static function getFileContents (&$file, $fallback)
         {
             $content = null;
             if (self::fileExists($file))
@@ -31,6 +36,8 @@
         {
             if (substr($file, 0, 1) == '/')
                 $file = FileHelper::getRoot() . substr($file, 1);
+
+            $file = realpath($file);
 
             return $file;
         }

@@ -122,10 +122,10 @@
          */
         public static function run ($configFile = null, $stdinOverride = null)
         {
-            if (!isset($configFile))
-                $configFile = '/config/alexa.json';
+            SettingsHelper::parseConfig(FileHelper::getRelativePath(__DIR__ . '/../config/') . "default.json");
+            SettingsHelper::parseConfig((isset($configFile)) ? $configFile : '/config/alexa.json');
 
-            $settings = SettingsHelper::parseConfig($configFile);
+            $settings = SettingsHelper::getConfig();
 
             var_dump($settings); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
 

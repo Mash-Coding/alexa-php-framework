@@ -9,10 +9,17 @@
 
             $_settings = FileHelper::parseJSON($file);
             
-            if (!isset($parsedSettings))
+            if (!isset($__PARSED_SETTINGS))
                 $__PARSED_SETTINGS = [];
 
             $__PARSED_SETTINGS = array_merge($__PARSED_SETTINGS, $_settings);
+
+            return $__PARSED_SETTINGS;
+        }
+
+        public static function getConfig ()
+        {
+            global $__PARSED_SETTINGS;
             return $__PARSED_SETTINGS;
         }
     }

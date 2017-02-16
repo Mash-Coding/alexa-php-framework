@@ -1,0 +1,19 @@
+{
+  "path": {
+    "projectRoot": "/",
+    "publicRoot" : "/web/"
+  },
+
+  "skills": {},
+
+  "__example_config__": {
+    "skills": {
+      "skill_id": {
+        "name": "Skill Name",
+        "intents": {
+          "intentName": "IntentClassName"
+        }
+      }
+    }
+  }
+}
