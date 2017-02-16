@@ -1,0 +1,14 @@
+{
+    "name": "mash-coding/alexa-php-framework",
+    "description": "A simple framework to work with Amazon Echo API",
+
+    "require": {
+        "php": "^5.4 || ^7.0"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "MashCoding\\AlexaPHPFramework\\": "src/"
+        }
+    }
+}
