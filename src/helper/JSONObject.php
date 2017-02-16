@@ -44,11 +44,15 @@
 
         public function setData ($name, $value)
         {
-//            if (array_key_exists($name, $this->__data))
+            if (substr($name, 0, 2) == '__') {
+                $this->$name = $value;
+            } else {
+//                if (array_key_exists($name, $this->__data))
                 $this->__data[$name] = (is_object($value) && $value instanceof JSONObject) ? $value->data() : $value;
 
-            if (isset($this->__parent) && $this->__parent instanceof JSONObject)
-                $this->__parent->setData($this->__name, $this->data());
+                if (isset($this->__parent) && $this->__parent instanceof JSONObject)
+                    $this->__parent->setData($this->__name, $this->data());
+            }
         }
 
         public function data ()

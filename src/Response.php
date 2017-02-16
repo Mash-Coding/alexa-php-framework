@@ -2,6 +2,7 @@
     namespace MashCoding\AlexaPHPFramework;
 
     use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
+    use MashCoding\AlexaPHPFramework\handlers\RequestHandler;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
     use MashCoding\AlexaPHPFramework\helper\SSMLHelper;
 
@@ -16,28 +17,32 @@
             "response" => [],
         ];
 
-        public static function fromRequest (Request $Request)
+        public static function fromRequest (Request &$Request)
         {
             $ResponseObj = new Response();
             try {
+                $ResponseObj->__request = $Request;
                 $ResponseObj->version = $Request->version;
-
-                $ResponseObj->setType($Request->request->type);
             } catch (ResponseException $e) {
                 var_dump($e); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
             }
 
             return $ResponseObj;
         }
-        
-        private function setType ($type)
+
+        private function exec ()
         {
-            if (!in_array($type, Request::$VALID_TYPES))
-                throw new ResponseException("Invalid Request-Type!", ResponseException::CODE_FATAL);
+            $Handler = RequestHandler::getHandler($this);
+
+            var_dump($Handler); print ' in ' . __FILE__ . '::' . __LINE__; exit;
+
+            return $this;
         }
 
         public function fetch ()
         {
+            $this->exec();
+
             if (!$this->response->hasProperties())
                 $this->respond(SSMLHelper::say("haha?"));
 

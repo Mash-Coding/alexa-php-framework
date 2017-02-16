@@ -1,6 +1,7 @@
 <?php
     namespace MashCoding\AlexaPHPFramework;
 
+    use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
     use MashCoding\AlexaPHPFramework\helper\ArrayHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
 
@@ -102,6 +103,29 @@
             }
 
             return true;
+        }
+
+        public static function run ($input = null)
+        {
+            $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($input);
+            $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
+
+            try {
+                $AlexaResponse->fetch();
+//                var_dump($AlexaResponse); exit;
+            } catch (ResponseException $e) {
+
+                if ($e->getCode() == ResponseException::CODE_REPROMT)
+                    $AlexaResponse->ask($e->sayMessage());
+                else
+                    $AlexaResponse->respond($e->sayMessage());
+
+            } catch (\Exception $e) {
+                var_dump($e); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
+            }
+
+            header('Content-Type: application/json; charset=UTF-8');
+            echo $AlexaResponse->json();
         }
 
         public function __construct ($stdin = null)

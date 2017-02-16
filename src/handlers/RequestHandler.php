@@ -1,0 +1,32 @@
+<?php
+    namespace MashCoding\AlexaPHPFramework\handlers;
+
+    use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
+    use MashCoding\AlexaPHPFramework\helper\ObjectHelper;
+    use MashCoding\AlexaPHPFramework\Request;
+    use MashCoding\AlexaPHPFramework\Response;
+
+    class RequestHandler
+    {
+        /**
+         * @var Response
+         */
+        protected $Response;
+
+        public static function getHandler (Response &$Response)
+        {
+            $type = $Response->__request->request->type;
+            $handler = str_replace(ObjectHelper::getClassname(self::class), ucfirst($type) . 'Handler', self::class);
+            if (!in_array($type, Request::$VALID_TYPES))
+                throw new ResponseException("Unknown RequestType", ResponseException::CODE_FATAL);
+            else if (!class_exists($handler))
+                throw new ResponseException("Unknown RequestHandler", ResponseException::CODE_FATAL);
+
+            return new $handler($Response);
+        }
+
+        public function __construct (Response &$Response)
+        {
+            $this->Response = $Response;
+        }
+    }
