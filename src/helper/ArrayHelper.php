@@ -3,6 +3,14 @@
 
     class ArrayHelper
     {
+        /**
+         * checks if all keys from $needleArray are set in $haystack
+         *
+         * @param array $needleArray
+         * @param array $haystack
+         *
+         * @return bool
+         */
         public static function areKeysSet (array $needleArray, array $haystack)
         {
             $keysSet = true;
@@ -16,6 +24,16 @@
             return $keysSet;
         }
 
+        /**
+         * checks if specified $expectedScheme is given in $actualArray. Additionally this method will do a type cast
+         * to provide type-safety
+         *
+         * @param array $expectedScheme
+         * @param array $actualArray
+         *
+         * @return bool
+         * @throws \Exception
+         */
         public static function validateArrayScheme (array $expectedScheme, array &$actualArray)
         {
             $isValid = true;
@@ -75,6 +93,14 @@
             return $isValid;
         }
 
+        /**
+         * gets only those values of $array, whose key is specified in $filter
+         *
+         * @param array $filter
+         * @param array $array
+         *
+         * @return array
+         */
         public static function getFilteredArray (array $filter, array $array)
         {
             $filteredArray = [];

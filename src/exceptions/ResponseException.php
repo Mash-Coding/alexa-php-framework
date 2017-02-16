@@ -6,6 +6,7 @@
 
     class ResponseException extends \Exception
     {
+        const CODE_STOP    = 0;
         const CODE_ERROR   = 503;
         const CODE_FATAL   = 500;
         const CODE_REPROMT = 404;
@@ -17,7 +18,7 @@
 
         public function __construct ($message = "", $code = self::CODE_ERROR, $previous = null)
         {
-            if (strpos(strtolower($message), 'error:') === false && $code !== self::CODE_REPROMT)
+            if (strpos(strtolower($message), 'error:') === false && ($code == self::CODE_ERROR || $code == self::CODE_FATAL))
                 $message = "Error: " . $message;
 
             parent::__construct($message, $code, $previous);

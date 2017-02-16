@@ -88,6 +88,13 @@
             ],
         ];
 
+        /**
+         * validates given $input by merging it with a default request scheme and then validating the values
+         *
+         * @param $input
+         *
+         * @return bool
+         */
         private static function validateRequest (&$input)
         {
             if (empty($input))
@@ -105,7 +112,12 @@
             return true;
         }
 
-        public static function run ($input = null)
+        /**
+         * parses either stdin or given $input and creates a appropriate response
+         *
+         * @param null|string $input manual override for default PHP STDIN
+         */
+        public static function parse ($input = null)
         {
             $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($input);
             $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
