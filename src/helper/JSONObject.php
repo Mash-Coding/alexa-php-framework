@@ -42,6 +42,14 @@
             return (!!array_key_exists($property, $this->data()) && isset($this->data()[$property]));
         }
 
+        public function invokeData ($data)
+        {
+            foreach ($data as $prop => $value) {
+                $this->setData($prop, $value);
+            };
+            return $this;
+        }
+
         public function setData ($name, $value)
         {
             if (substr($name, 0, 2) == '__') {

@@ -47,9 +47,6 @@
         private function exec ()
         {
             $Handler = RequestHandler::getHandler($this);
-
-            var_dump($Handler); print ' in ' . __FILE__ . '::' . __LINE__; exit;
-
             return $this;
         }
 
@@ -65,7 +62,7 @@
             $this->exec();
 
             if (!$this->response->hasProperties())
-                throw new ResponseException("", ResponseException::CODE_STOP);
+                throw new ResponseException("OK", ResponseException::CODE_STOP);
 
             return $this->data();
         }
@@ -122,6 +119,13 @@
             $this->response->shouldEndSession = (!$this->response->hasProperty('repromt'));
 
             return $this;
+        }
+
+        public function appendCard ($cardType = Card::TYPE_STANDARD)
+        {
+            $card = new Card($cardType, "card", $this->response);
+            $this->response->card = $card;
+            return $card;
         }
 
         public function __construct ()
