@@ -125,12 +125,10 @@
             SettingsHelper::parseConfig(FileHelper::getRelativePath(__DIR__ . '/../config/') . "default.json");
             SettingsHelper::parseConfig((isset($configFile)) ? $configFile : '/config/alexa.json');
 
-            $settings = SettingsHelper::getConfig();
-
-            var_dump($settings); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-
             $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
             $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
+
+            $AlexaResponse->appendCard(Card::TYPE_STANDARD)->setTitle("test")->setImage("https://www.w3schools.com/css/img_fjords.jpg", "https://www.w3schools.com/css/trolltunga.jpg");
 
             try {
                 $AlexaResponse->fetch();
