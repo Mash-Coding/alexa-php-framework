@@ -128,6 +128,8 @@
             $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
             $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
 
+            $AlexaResponse->appendCard(Card::TYPE_STANDARD)->setTitle("test")->setImage("https://www.w3schools.com/css/img_fjords.jpg", "https://www.w3schools.com/css/trolltunga.jpg");
+
             try {
                 $AlexaResponse->fetch();
 
