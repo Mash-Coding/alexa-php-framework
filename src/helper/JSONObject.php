@@ -46,8 +46,11 @@
 
         public function __construct (array $data, $name = null, $parent = null)
         {
-            $this->__name = $name;
             $this->__data = $data;
-            $this->__parent = $parent;
+
+            if (isset($name) && isset($parent) && $parent instanceof JSONObject) {
+                $this->__name = $name;
+                $this->__parent = $parent;
+            }
         }
     }
