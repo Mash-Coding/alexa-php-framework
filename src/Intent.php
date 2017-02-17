@@ -39,10 +39,13 @@
         public function callAction ()
         {
             $action = $this->getActionFromSlots();
+            $rawAction = array_search(implode(',', array_keys($this->slots)), $this->registeredActions);
             if (isset($action))
                 $this->$action(ArrayHelper::getFilteredArray($this->data->actions->data()[lcfirst(substr($action, 6))], $this->slots));
+            else if ($rawAction)
+                throw new ResponseException(LocalizationHelper::localize("unknown value", ["type" => "action", "value" => $rawAction]));
             else
-                throw new ResponseException(LocalizationHelper::localize("unknown value", ["type" => "action", "value" => array_search(implode(',', array_keys($this->slots)), $this->registeredActions)]));
+                throw new ResponseException(LocalizationHelper::localize("invalid", ["action"]));
         }
 
         /**

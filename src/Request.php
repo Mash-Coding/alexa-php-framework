@@ -34,10 +34,10 @@
             "context" => [
                 "System" => [
                     "application" => [
-                        "applicationId" => null,
+                        "applicationId" => "",
                     ],
                     "user" => [
-                        "userId" => null,
+                        "userId" => "",
                     ],
                     "device" => [],
                 ],
@@ -63,7 +63,7 @@
                     "?accessToken" => "string",
                 ],
             ],
-            "context" => [
+            "?context" => [
                 "System" => [
                     "application" => [
                         "applicationId" => "string",
