@@ -6,6 +6,10 @@
     "skills": "/src/"
   },
 
+  "namespace": {
+    "skills": "\\app\\skills\\"
+  },
+
   "defaults": {
     "locale": "en-US"
   },
@@ -14,12 +18,22 @@
 
   "__example_config__": {
     "skills": {
+
       "skill_id": {
         "name": "Skill Name",
+
         "intents": {
-          "intentName": "IntentClassName"
+          "intentName": {
+            "intentClass": "someClass",
+            "actions": {
+              "anAction": ["slot1", "slot2"]
+            }
+          }
         }
+
       }
+
     }
   }
+
 }

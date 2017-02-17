@@ -22,16 +22,36 @@
             FileHelper::EXTENSION_PNG, FileHelper::EXTENSION_JPEG,
         ];
 
+        /**
+         * gets the cards type
+         *
+         * @param $type
+         *
+         * @return null
+         */
         public static function getType (&$type)
         {
             return (array_key_exists($type, self::$TYPE_PROPERTIES)) ? $type : null;
         }
 
+        /**
+         * checks if $property is allowed by the cards type
+         *
+         * @param $property
+         *
+         * @return bool
+         */
         private function isValidProperty ($property)
         {
             return ($this->type && $property && in_array($property, self::$TYPE_PROPERTIES[$this->type]));
         }
 
+        /**
+         * sets property if its a valid property of the card
+         *
+         * @param $name
+         * @param $value
+         */
         private function setProperty ($name, $value)
         {
             if ($this->isValidProperty($name))
@@ -50,6 +70,12 @@
             return $this;
         }
 
+        /**
+         * appends an image to the card, if either one of both image urls ($imageBig or $imageSmall) is valid and exists
+         *
+         * @param $imageBig
+         * @param $imageSmall
+         */
         public function setImage ($imageBig, $imageSmall)
         {
             $largeOneOK = ($imageBig && URLHelper::isValidURL($imageBig, URLHelper::PROTOCOL_HTTPS) && in_array(FileHelper::getFileExtension($imageBig), self::$IMAGE_EXTENSIONS));

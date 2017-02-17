@@ -3,6 +3,10 @@
 
     class DataHandler extends JSONObject
     {
+        /**
+         * initializes or gets the global DateHandler object
+         * @return DataHandler
+         */
         public static function getDataObject ()
         {
             global $__PARSED_ALEXA_DATA__;

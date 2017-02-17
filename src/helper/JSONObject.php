@@ -33,15 +33,45 @@
             return $this;
         }
 
+        /**
+         * checks if JSONObject::__data contains any data
+         * @return bool
+         */
         public function hasProperties ()
         {
             return (!!count($this->data()));
         }
+        /**
+         * checks if specified $property is set in JSONObject::__data
+         *
+         * @param $property
+         *
+         * @return bool
+         */
         public function hasProperty ($property)
         {
             return ($this->hasProperties() && array_key_exists($property, $this->data()) && isset($this->data()[$property]));
         }
+        /**
+         * gets property with name $property
+         *
+         * @param $property
+         *
+         * @return array|JSONObject|mixed|null
+         */
+        public function getProperty ($property)
+        {
+            return $this->$property;
+        }
 
+        /**
+         * sets an array of data
+         *
+         * @param $data
+         *
+         * @return $this
+         * @see JSONObject::setData()
+         */
         public function invokeData ($data)
         {
             foreach ($data as $prop => $value) {
@@ -50,6 +80,13 @@
             return $this;
         }
 
+        /**
+         * sets data accordingly to its name (names starting with '__' will be set directly, though all other values
+         * are set to JSONObject::__data)
+         *
+         * @param $name
+         * @param $value
+         */
         public function setData ($name, $value)
         {
             if (substr($name, 0, 2) == '__') {
@@ -63,11 +100,19 @@
             }
         }
 
+        /**
+         * returns the objects data
+         * @return array
+         */
         public function data ()
         {
             return $this->__data;
         }
 
+        /**
+         * returns the objects data as JSON
+         * @return string
+         */
         public function json ()
         {
             return json_encode($this->data());
@@ -78,6 +123,13 @@
             return '';
         }
 
+        /**
+         * JSONObject constructor.
+         *
+         * @param array $data
+         * @param null  $name
+         * @param null  $parent
+         */
         public function __construct (array $data, $name = null, $parent = null)
         {
             $this->__data = $data;

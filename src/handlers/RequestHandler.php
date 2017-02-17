@@ -28,10 +28,17 @@
                 break;
 
                 case "skill":
-                    $skillId = $this->application->applicationId;
-                    $Settings = SettingsHelper::getConfig();
-                    if ($Settings->skills->hasProperty($skillId))
-                        $val = new Skill($skillId, $Settings->skills->$skillId->data());
+                    $val = null;
+                    if ($this->__skill)
+                        $val = $this->__skill;
+                    else {
+                        $skillId = $this->application->applicationId;
+                        $Settings = SettingsHelper::getConfig();
+                        if ($Settings->skills->hasProperty($skillId))
+                            $val = new Skill($skillId, $Settings->skills->$skillId->data());
+
+                        $this->__skill = $val;
+                    }
                 break;
 
                 default:
@@ -40,6 +47,13 @@
             return $val;
         }
 
+        /**
+         * executes the response (and request) with a RequestHandler
+         *
+         * @param Response $Response
+         *
+         * @throws ResponseException
+         */
         public static function execResponse (Response &$Response)
         {
             $type = $Response->__request->request->type;
@@ -56,14 +70,31 @@
              * @var $Handler RequestHandler
              */
             $Handler = new $handler($Response);
-            $Handler->run();
+            $Handler->init();
         }
 
-        public function run ()
+        /**
+         * validates the handler and then runs it
+         *
+         * @throws ResponseException
+         */
+        public function init ()
         {
             $this->validate();
+            $this->run();
         }
 
+        /**
+         * gets called after validating the handler
+         */
+        protected function run () {}
+
+        /**
+         * checks if skill is valid and available
+         *
+         * @return bool
+         * @throws ResponseException
+         */
         protected function validate ()
         {
             $Settings = SettingsHelper::getConfig();

@@ -118,6 +118,13 @@
             return $this;
         }
 
+        /**
+         * appends a "empty" Card to the response
+         *
+         * @param string $cardType
+         *
+         * @return Card
+         */
         public function appendCard ($cardType = Card::TYPE_STANDARD)
         {
             $card = new Card($cardType, "card", $this->response);

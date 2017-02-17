@@ -50,6 +50,7 @@ fabric.properties
 composer.lock
 vendor/
 
+src/skills/
 views/
 dev/
 web/
