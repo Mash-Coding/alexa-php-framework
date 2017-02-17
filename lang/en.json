@@ -1,0 +1,5 @@
+{
+  "invalid value": "invalid {{type}} '{{value}}'",
+
+  "no intent": "no intent received"
+}

@@ -1,6 +1,7 @@
 <?php
     namespace MashCoding\AlexaPHPFramework\exceptions;
 
+    use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
     use MashCoding\AlexaPHPFramework\helper\SSMLHelper;
     use Prophecy\Exception\Exception;
 
@@ -18,6 +19,7 @@
 
         public function __construct ($message = "", $code = self::CODE_ERROR, $previous = null)
         {
+            $message = LocalizationHelper::localize($message);
             if (strpos(strtolower($message), 'error:') === false && ($code == self::CODE_ERROR || $code == self::CODE_FATAL))
                 $message = "Error: " . $message;
 

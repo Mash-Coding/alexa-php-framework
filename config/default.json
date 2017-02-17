@@ -1,7 +1,8 @@
 {
   "path": {
-    "projectRoot": "/",
-    "publicRoot" : "/web/"
+    "root": "/",
+    "public" : "/web/",
+    "locale": "/lang/"
   },
 
   "defaults": {

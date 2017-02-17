@@ -88,6 +88,14 @@
                 "requestId" => "string",
                 "timestamp" => "string",
                 "locale"    => "language",
+                "?intent"   => [
+                    "name"  => "string",
+                    "slots" => "array",
+                ],
+                "?error" => [
+                    "type" => "string",
+                    "message" => "string"
+                ],
             ],
         ];
 
@@ -132,8 +140,6 @@
 
             try {
                 $AlexaResponse->fetch();
-
-                var_dump($AlexaResponse); exit;
             } catch (ResponseException $e) {
 
                 if ($e->getCode() == ResponseException::CODE_REPROMT)

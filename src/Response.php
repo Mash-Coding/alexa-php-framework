@@ -42,7 +42,8 @@
          */
         private function exec ()
         {
-            $Handler = RequestHandler::getHandler($this);
+            RequestHandler::execResponse($this);
+
             return $this;
         }
 
