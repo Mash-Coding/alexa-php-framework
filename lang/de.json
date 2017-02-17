@@ -1,0 +1,9 @@
+{
+  "invalid": "{{0}} ungültig",
+  "unknown value": "{{type}} hat unbekannten Wert '{{value}}'",
+  "invalid value": "{{type}} hat ungültigen Wert '{{value}}'",
+
+  "no intent": "keine Intention erhalten",
+
+  "OK": "OK"
+}

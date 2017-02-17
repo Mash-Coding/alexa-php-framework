@@ -34,11 +34,11 @@
             $handler = str_replace(ObjectHelper::getClassname(self::class), ucfirst($type) . 'Handler', self::class);
 
             if (!$Response->hasProperties() || !$Response->__request->hasProperties())
-                throw new ResponseException("invalid request", ResponseException::CODE_FATAL);
+                throw new ResponseException(LocalizationHelper::localize("invalid", ["request"]), ResponseException::CODE_FATAL);
             else if (!in_array($type, Request::$VALID_TYPES))
-                throw new ResponseException("unknown request type '" . $type . "'", ResponseException::CODE_FATAL);
+                throw new ResponseException(LocalizationHelper::localize("unknown value", ["type" => "request type", "value" => $type]), ResponseException::CODE_FATAL);
             else if (!class_exists($handler))
-                throw new ResponseException("unknown request handler '" . ObjectHelper::getClassname($handler) . "'", ResponseException::CODE_FATAL);
+                throw new ResponseException(LocalizationHelper::localize("unknown value", ["type" => "request handler", "value" => ObjectHelper::getClassname($handler)]), ResponseException::CODE_FATAL);
 
             /**
              * @var $Handler RequestHandler

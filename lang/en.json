@@ -1,5 +1,9 @@
 {
+  "invalid": "invalid {{0}}",
+  "unknown value": "unknown {{type}} '{{value}}'",
   "invalid value": "invalid {{type}} '{{value}}'",
 
-  "no intent": "no intent received"
+  "no intent": "no intent received",
+
+  "OK": "OK"
 }
