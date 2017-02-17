@@ -4,6 +4,10 @@
     "publicRoot" : "/web/"
   },
 
+  "defaults": {
+    "locale": "en-US"
+  },
+
   "skills": {},
 
   "__example_config__": {

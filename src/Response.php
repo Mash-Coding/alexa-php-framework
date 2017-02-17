@@ -27,12 +27,8 @@
         public static function fromRequest (Request &$Request)
         {
             $ResponseObj = new Response();
-            try {
-                $ResponseObj->__request = $Request;
-                $ResponseObj->version = $Request->version;
-            } catch (ResponseException $e) {
-                var_dump($e); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            }
+            $ResponseObj->__request = $Request;
+            $ResponseObj->version = $Request->version;
 
             return $ResponseObj;
         }

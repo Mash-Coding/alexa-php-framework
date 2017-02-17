@@ -5,6 +5,7 @@
     use MashCoding\AlexaPHPFramework\helper\ArrayHelper;
     use MashCoding\AlexaPHPFramework\helper\FileHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
+    use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
     use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
 
     class Request extends JSONObject
@@ -103,9 +104,10 @@
                 return false;
             
             $input = array_merge(self::$BASE_REQUEST, json_decode($input, true));
-
             try {
                 ArrayHelper::validateArrayScheme(self::$REQUEST_SCHEME, $input);
+
+                LocalizationHelper::validateLocale($input['request']['locale']);
             } catch (\Exception $e) {
                 $input = null;
                 return false;
@@ -128,12 +130,10 @@
             $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
             $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
 
-            $AlexaResponse->appendCard(Card::TYPE_STANDARD)->setTitle("test")->setImage("https://www.w3schools.com/css/img_fjords.jpg", "https://www.w3schools.com/css/trolltunga.jpg");
-
             try {
                 $AlexaResponse->fetch();
 
-//                var_dump($AlexaResponse); exit;
+                var_dump($AlexaResponse); exit;
             } catch (ResponseException $e) {
 
                 if ($e->getCode() == ResponseException::CODE_REPROMT)
@@ -144,9 +144,8 @@
             } catch (\Exception $e) {
                 var_dump($e); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
             }
-            $AlexaResponse->appendCard(Card::TYPE_STANDARD)->setTitle("test")->setImage("https://www.w3schools.com/css/img_fjords.jpg", "https://www.w3schools.com/css/trolltunga.jpg");
 
-            header('Content-Type: application/json; charset=UTF-8');
+//            header('Content-Type: application/json; charset=UTF-8');
             echo $AlexaResponse->json();
         }
 

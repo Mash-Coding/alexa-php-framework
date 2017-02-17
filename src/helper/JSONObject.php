@@ -73,6 +73,11 @@
             return json_encode($this->data());
         }
 
+        public function __toString ()
+        {
+            return '';
+        }
+
         public function __construct (array $data, $name = null, $parent = null)
         {
             $this->__data = $data;

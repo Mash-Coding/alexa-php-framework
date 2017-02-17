@@ -52,8 +52,18 @@
 
         public function setImage ($imageBig, $imageSmall)
         {
-            if (URLHelper::isValidURL($imageBig, URLHelper::PROTOCOL_HTTPS) && in_array(FileHelper::getFileExtension($imageBig), self::$IMAGE_EXTENSIONS) &&
-                URLHelper::isValidURL($imageSmall, URLHelper::PROTOCOL_HTTPS) && in_array(FileHelper::getFileExtension($imageSmall), self::$IMAGE_EXTENSIONS))
+            $largeOneOK = ($imageBig && URLHelper::isValidURL($imageBig, URLHelper::PROTOCOL_HTTPS) && in_array(FileHelper::getFileExtension($imageBig), self::$IMAGE_EXTENSIONS));
+            $smallOneOK = ($imageSmall && URLHelper::isValidURL($imageSmall, URLHelper::PROTOCOL_HTTPS) && in_array(FileHelper::getFileExtension($imageSmall), self::$IMAGE_EXTENSIONS));
+
+            if ($smallOneOK && !$largeOneOK) {
+                $imageBig = $imageSmall;
+                $largeOneOK = $smallOneOK;
+            } else if (!$smallOneOK && $largeOneOK) {
+                $imageSmall = $imageBig;
+                $smallOneOK = $largeOneOK;
+            }
+
+            if ($smallOneOK && $largeOneOK)
                 $this->setProperty("image", ["smallImageUrl" => $imageSmall, "largeImageUrl" => $imageBig]);
         }
 

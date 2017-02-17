@@ -3,23 +3,15 @@
 
     class SettingsHelper
     {
-        public static function parseConfig ($file)
+        public static function parseConfig ($file, $name = 'settings')
         {
-            global $__PARSED_SETTINGS;
-
-            $_settings = FileHelper::parseJSON($file);
-            
-            if (!isset($__PARSED_SETTINGS))
-                $__PARSED_SETTINGS = [];
-
-            $__PARSED_SETTINGS = array_merge($__PARSED_SETTINGS, $_settings);
-
-            return $__PARSED_SETTINGS;
+            $Settings = self::getConfig();
+            $Settings->invokeData(array_merge($Settings->data(), FileHelper::parseJSON($file)));
+            return $Settings;
         }
 
-        public static function getConfig ()
+        public static function getConfig ($name = 'settings')
         {
-            global $__PARSED_SETTINGS;
-            return $__PARSED_SETTINGS;
+            return DataHandler::getDataObject()->$name;
         }
     }
