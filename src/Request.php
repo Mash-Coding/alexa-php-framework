@@ -151,7 +151,7 @@
                 var_dump($e); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
             }
 
-//            header('Content-Type: application/json; charset=UTF-8');
+            header('Content-Type: application/json; charset=UTF-8');
             echo $AlexaResponse->json();
         }
 
