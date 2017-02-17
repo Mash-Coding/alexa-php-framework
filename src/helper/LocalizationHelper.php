@@ -24,7 +24,10 @@
         public static function localize ($message, $properties = [])
         {
             $Localization = self::getLocalization();
-            $message = ($Localization->$message) ? strtr($Localization->$message, array_map(function ($a) { return '{{' . $a . '}}'; }, $properties)) : $message;
+
+            $search = array_map(function ($a) { return '{{' . $a . '}}'; }, array_keys($properties));
+            $replace = array_values($properties);
+            $message = ($Localization->hasProperty($message)) ? str_replace($search, $replace, $Localization->$message) : $message;
             return $message;
         }
 

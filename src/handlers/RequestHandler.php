@@ -7,6 +7,7 @@
     use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
     use MashCoding\AlexaPHPFramework\Request;
     use MashCoding\AlexaPHPFramework\Response;
+    use MashCoding\AlexaPHPFramework\Skill;
 
     class RequestHandler
     {
@@ -20,6 +21,17 @@
             switch ($name) {
                 case "request":
                     $val = $this->Response->__request->request;
+                break;
+
+                case "application":
+                    $val = $this->Response->__request->session->application ?: $this->Response->__request->context->System->application;
+                break;
+
+                case "skill":
+                    $skillId = $this->application->applicationId;
+                    $Settings = SettingsHelper::getConfig();
+                    if ($Settings->skills->hasProperty($skillId))
+                        $val = new Skill($skillId, $Settings->skills->$skillId->data());
                 break;
 
                 default:
@@ -54,6 +66,14 @@
 
         protected function validate ()
         {
+            $Settings = SettingsHelper::getConfig();
+
+            // check if skill is valid
+            if (!$Settings->skills->hasProperties())
+                throw new ResponseException("no skills", ResponseException::CODE_FATAL);
+            else if (!$this->skill)
+                throw new ResponseException(LocalizationHelper::localize("unknown", ["skill"]), ResponseException::CODE_FATAL);
+
             return true;
         }
 

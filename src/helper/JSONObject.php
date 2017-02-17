@@ -39,7 +39,7 @@
         }
         public function hasProperty ($property)
         {
-            return (!!array_key_exists($property, $this->data()) && isset($this->data()[$property]));
+            return ($this->hasProperties() && array_key_exists($property, $this->data()) && isset($this->data()[$property]));
         }
 
         public function invokeData ($data)

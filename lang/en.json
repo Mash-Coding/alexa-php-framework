@@ -1,9 +1,11 @@
 {
+  "unknown": "unknown {{0}}",
   "invalid": "invalid {{0}}",
   "unknown value": "unknown {{type}} '{{value}}'",
   "invalid value": "invalid {{type}} '{{value}}'",
 
   "no intent": "no intent received",
+  "no skills": "no skills available for this application",
 
   "OK": "OK"
 }

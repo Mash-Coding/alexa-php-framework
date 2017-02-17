@@ -2,7 +2,8 @@
   "path": {
     "root": "/",
     "public" : "/web/",
-    "locale": "/lang/"
+    "locale": "/lang/",
+    "skills": "/src/"
   },
 
   "defaults": {

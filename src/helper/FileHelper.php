@@ -69,4 +69,22 @@
 
             return $file;
         }
+
+        public static function makeConformName ($name)
+        {
+            return strtr(strtolower($name), [
+                " " => "_",
+                "ä" => "ae",
+                "ö" => "oe",
+                "ü" => "ue",
+                "ß" => "ss",
+
+                "%" => "",
+                "&" => "",
+                "?" => "",
+                "!" => "",
+                ";" => "",
+                ":" => "",
+            ]);
+        }
     }

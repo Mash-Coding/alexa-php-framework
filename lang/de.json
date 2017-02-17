@@ -1,9 +1,11 @@
 {
+  "unknown": "{{0}} unbekannt",
   "invalid": "{{0}} ungültig",
   "unknown value": "{{type}} hat unbekannten Wert '{{value}}'",
   "invalid value": "{{type}} hat ungültigen Wert '{{value}}'",
 
   "no intent": "keine Intention erhalten",
+  "no skills": "keine Skills für diese Applikation verfügbar",
 
   "OK": "OK"
 }
