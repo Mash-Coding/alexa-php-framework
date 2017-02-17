@@ -13,6 +13,11 @@
          */
         protected $__parent = null;
 
+        public static function escape ($string)
+        {
+            return strtr($string, []);
+        }
+
         public function __get ($name)
         {
             $value = null;
@@ -92,7 +97,7 @@
             if (substr($name, 0, 2) == '__') {
                 $this->$name = $value;
             } else {
-//                if (array_key_exists($name, $this->__data))
+                //                if (array_key_exists($name, $this->__data))
                 $this->__data[$name] = (is_object($value) && $value instanceof JSONObject) ? $value->data() : $value;
 
                 if (isset($this->__parent) && $this->__parent instanceof JSONObject)

@@ -38,5 +38,5 @@
                  self::$RESPONSE_TYPE_PROPERTY[$responseType] => $message
             ]);
         }
-        
+
     }
