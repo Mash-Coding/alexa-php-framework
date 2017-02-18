@@ -68,6 +68,19 @@
             return self::say((($title) ? $title . ':' . $beginSeperator : '') . implode($divider, $list) . (($last) ? $lastDivider . $last : '') . (($atEnd) ? $atEnd : ''));
         }
 
+        /**
+         * interjecs given message
+         *
+         * @param $message
+         * @todo move into new function ::interpretAs() or ::sayAs($message, 'interpret', 'interjection')
+         *
+         * @return string
+         */
+        public static function interject ($message)
+        {
+            return '<say-as interpret-as="interjection">' . $message . '</say-as>';
+        }
+
         public static function pause ($pauseType = self::PAUSE_STRONG)
         {
             $pause = (preg_match('/\\d/', $pauseType)) ? floatval($pauseType) : $pauseType;
