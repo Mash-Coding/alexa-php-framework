@@ -1,6 +1,8 @@
 <?php
     namespace MashCoding\AlexaPHPFramework\helper;
 
+    use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
+
     class ArrayHelper
     {
         /**
@@ -42,17 +44,17 @@
                 if ($optional)
                     $key = substr($key, 1);
 
-                if (!array_key_exists($key, $actualArray)) {
+                if (!array_key_exists($key, $actualArray) && $type !== "array") {
                     if (!$optional)
-                        throw new \Exception("Key '" . $key . "' does not exist in array");
+                        throw new \Exception("Key '" . $key . "' does not exist in array", ResponseException::CODE_FATAL);
                 } else if (!is_array($type)) {
 
-                    $value = $actualArray[$key];
+                    $value = (isset($actualArray[$key])) ? $actualArray[$key] : null;
                     switch ($type) {
                         case "array":
-                            $valid = is_array($value);
+                            $valid = is_array($value) || $value === null;
 
-                            if (!$valid)
+                            if (!$valid || $value === null)
                                 $value = [];
                         break;
 
@@ -81,7 +83,7 @@
                     };
 
                     if (!$valid)
-                        throw new \Exception("Value for key '" . $key . "' does not match expected type '" . $type . "'");
+                        throw new \Exception("Value for key '" . $key . "' does not match expected type '" . $type . "'", ResponseException::CODE_FATAL);
                     else
                         $actualArray[$key] = $value;
                 } else if (is_array($type)) {

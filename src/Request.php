@@ -3,6 +3,7 @@
 
     use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
     use MashCoding\AlexaPHPFramework\helper\ArrayHelper;
+    use MashCoding\AlexaPHPFramework\helper\DataHandler;
     use MashCoding\AlexaPHPFramework\helper\FileHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
     use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
@@ -79,7 +80,7 @@
                 ],
                 "?AudioPlayer" => [
                     "?token" => "string",
-                    "offsetInMilliseconds" => "number",
+                    "?offsetInMilliseconds" => "number",
                     "playerActivity" => "string"
                 ],
             ],
@@ -112,14 +113,10 @@
                 return false;
             
             $input = array_merge(self::$BASE_REQUEST, json_decode($input, true));
-            try {
-                ArrayHelper::validateArrayScheme(self::$REQUEST_SCHEME, $input);
 
-                LocalizationHelper::validateLocale($input['request']['locale']);
-            } catch (\Exception $e) {
-                $input = null;
-                return false;
-            }
+            ArrayHelper::validateArrayScheme(self::$REQUEST_SCHEME, $input);
+
+            LocalizationHelper::validateLocale($input['request']['locale']);
 
             return true;
         }
@@ -132,35 +129,48 @@
          */
         public static function run ($configFile = null, $stdinOverride = null)
         {
-            SettingsHelper::parseConfig(FileHelper::getRelativePath(__DIR__ . '/../config/') . "default.json");
-            SettingsHelper::parseConfig((isset($configFile)) ? $configFile : '/config/alexa.json');
-
-            $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
-            $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
-
             try {
-                $AlexaResponse->fetch();
-            } catch (ResponseException $e) {
+                SettingsHelper::parseConfig(FileHelper::getRelativePath(__DIR__ . '/../config/') . "default.json");
+                SettingsHelper::parseConfig((isset($configFile)) ? $configFile : '/config/alexa.json');
 
-                if ($e->getCode() == ResponseException::CODE_REPROMT)
-                    $AlexaResponse->ask($e->sayMessage());
-                else
-                    $AlexaResponse->respond($e->sayMessage());
+                $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
+                $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
 
+                try {
+                    $AlexaResponse->fetch();
+                } catch (ResponseException $e) {
+
+                    if ($e->getCode() == ResponseException::CODE_REPROMT)
+                        $AlexaResponse->ask($e->sayMessage());
+                    else
+                        $AlexaResponse->respond($e->sayMessage());
+
+                }
             } catch (\Exception $e) {
-                var_dump($e); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
+                // catch all remaining exceptions
+                $AlexaResponse = Response::defaultResponse();
+                $STDIN = "";
+                if (DEBUG) {
+                    $AlexaResponse->respond($e->getMessage());
+                    $STDIN = DataHandler::getDataObject()->stdin;
+                }
+
+                $AlexaResponse->appendCard(Card::TYPE_SIMPLE)
+                    ->setTitle("Exception #" . $e->getCode())
+                    ->setText($e->getMessage() . ((DEBUG) ? PHP_EOL . 'Request:' . PHP_EOL . $STDIN : ''));
             }
 
             header('Content-Type: application/json; charset=UTF-8');
-            echo $AlexaResponse->json();
+            echo (isset($AlexaResponse)) ? $AlexaResponse->json() : '{}';
         }
 
         public function __construct ($stdin = null)
         {
-            if (!isset($stdin))
+            if (!isset($stdin) || empty($stdin))
                 $stdin = file_get_contents('php://input');
 
-            if (!empty($stdin) && self::validateRequest($stdin))
+            DataHandler::getDataObject()->stdin = $stdin;
+            if ($stdin && self::validateRequest($stdin))
                 parent::__construct($stdin);
         }
     }

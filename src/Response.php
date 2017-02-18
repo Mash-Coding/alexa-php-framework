@@ -34,6 +34,19 @@
         }
 
         /**
+         * create basic response without further data
+         *
+         * @return Response
+         */
+        public static function defaultResponse ()
+        {
+            $ResponseObj = new Response();
+            $ResponseObj->version = "1.0";
+
+            return $ResponseObj;
+        }
+
+        /**
          * executes the request as in parsing the request type and creating a message for skill,
          * intent/launch/sessionend and slots
          *
