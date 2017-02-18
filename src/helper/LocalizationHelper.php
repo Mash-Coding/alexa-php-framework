@@ -75,6 +75,6 @@
 
             $Locale = self::getLocale();
             SettingsHelper::parseConfig(FileHelper::getRelativePath(__DIR__ . '/../../lang/') . $Locale->language . '.json', 'localization');
-            SettingsHelper::parseConfig($Settings->path->lang . $Locale->language . '.json', 'localization');
+            SettingsHelper::parseConfig($Settings->path->locale . $Locale->language . '.json', 'localization');
         }
     }

@@ -3,6 +3,8 @@
 
     use MashCoding\AlexaPHPFramework\helper\FileHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
+    use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
+    use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
 
     class Skill extends JSONObject
     {
@@ -61,5 +63,10 @@
                 "skillId" => $skillId,
             ]));
             $this->getAlias();
+
+            // load skill-based translation
+            $Settings = SettingsHelper::getConfig();
+            $Locale = LocalizationHelper::getLocale();
+            SettingsHelper::parseConfig($Settings->path->locale . $this->alias . '/' . $Locale->language . '.json', 'localization');
         }
     }
