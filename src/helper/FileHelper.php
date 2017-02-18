@@ -163,6 +163,11 @@
             return $file;
         }
 
+        public static function getModificationTime ($file)
+        {
+            return (self::fileExists($file)) ? filemtime($file) : null;
+        }
+
         /**
          * converts $name into a legit filename
          *

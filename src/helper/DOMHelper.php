@@ -17,6 +17,19 @@
         }
 
         /**
+         * @param      $class
+         * @param null $source
+         *
+         * @return \DOMNodeList|null
+         */
+        public static function getElementsByClass ($class, $source = null)
+        {
+            $DOMXPath = self::getDOMBySource($source);
+            $nodes = $DOMXPath->query('//*[@class="' . $class . '"]');
+            return ($nodes->length) ? $nodes : null;
+        }
+
+        /**
          * @param      $tag
          * @param null $source
          *
@@ -95,14 +108,16 @@
         }
 
         /**
-         * @param $html
+         * @param        $html
+         * @param string $charset
          *
          * @return \DOMXPath
          */
-        private static function getDOMByHtml ($html) {
+        private static function getDOMByHtml ($html, $charset = 'UTF-8') {
             libxml_use_internal_errors(true);
             $DOM = new \DOMDocument();
-            $DOM->loadHTML($html);
+            if ($html)
+                $DOM->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $charset));
             libxml_clear_errors();
 
             return new \DOMXPath($DOM);

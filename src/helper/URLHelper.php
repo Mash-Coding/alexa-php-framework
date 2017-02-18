@@ -19,4 +19,9 @@
         {
             return filter_var($url, FILTER_VALIDATE_URL) && (!isset($protocol) || substr($url, 0, strlen($protocol)) == $protocol);
         }
+
+        public static function stripQueryString ($url)
+        {
+            return self::isValidURL($url) ? preg_replace('/\\?.*/', '', $url) : $url;
+        }
     }
