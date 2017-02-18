@@ -105,6 +105,11 @@
             }
         }
 
+        public function push ($value)
+        {
+            $this->setData(count($this->data()), $value);
+        }
+
         /**
          * returns the objects data
          * @return array
@@ -116,11 +121,14 @@
 
         /**
          * returns the objects data as JSON
+         *
+         * @param int $options
+         *
          * @return string
          */
-        public function json ()
+        public function json ($options = 0)
         {
-            return json_encode($this->data());
+            return json_encode($this->data(), $options);
         }
 
         public function __toString ()
@@ -135,7 +143,7 @@
          * @param null  $name
          * @param null  $parent
          */
-        public function __construct (array $data, $name = null, $parent = null)
+        public function __construct (array $data = [], $name = null, $parent = null)
         {
             $this->__data = $data;
 
