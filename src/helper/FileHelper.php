@@ -149,12 +149,12 @@
             return $file;
         }
 
-        public static function getMostCurrentFileByFileName ($dir, $fileNameOnly = true)
+        public static function getMostCurrentFileByFileName ($dir, $fileNameOnly = true, $fileIndex = 0)
         {
             $file = null;
             if (self::dirExists($dir)) {
                 $files = scandir($dir, SCANDIR_SORT_DESCENDING);
-                $file = (isset($files[0]) && $files[0] != '.' && $files[0] != '..') ? $files[0] : null;
+                $file = (isset($files[$fileIndex]) && $files[$fileIndex] != '.' && $files[$fileIndex] != '..') ? $files[$fileIndex] : null;
             }
 
             if (isset($file) && !$fileNameOnly)
