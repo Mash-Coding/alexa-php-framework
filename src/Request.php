@@ -150,14 +150,14 @@
                 // catch all remaining exceptions
                 $AlexaResponse = Response::defaultResponse();
                 $STDIN = "";
-                if (DEBUG) {
+                if (defined('DEBUG') && DEBUG) {
                     $AlexaResponse->respond($e->getMessage());
                     $STDIN = DataHandler::getDataObject()->stdin;
                 }
 
                 $AlexaResponse->appendCard(Card::TYPE_SIMPLE)
                     ->setTitle("Exception #" . $e->getCode())
-                    ->setText($e->getMessage() . ((DEBUG) ? PHP_EOL . 'Request:' . PHP_EOL . $STDIN : ''));
+                    ->setText($e->getMessage() . ((defined('DEBUG') && DEBUG) ? PHP_EOL . 'Request:' . PHP_EOL . $STDIN : ''));
             }
 
             header('Content-Type: application/json; charset=UTF-8');
