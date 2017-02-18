@@ -6,6 +6,7 @@
         const EXTENSION_PNG = "png";
         const EXTENSION_JPEG = "jpg";
         const EXTENSION_JPG = "jpg";
+        const EXTENSION_JSON = "json";
 
         public static function getRoot ()
         {
@@ -21,7 +22,7 @@
          */
         public static function getRelativePath ($path)
         {
-            return str_replace(self::getRoot(), "/", realpath($path) . "/");
+            return str_replace(self::getRoot(), "/", realpath((!is_dir($path)) ? dirname($path) . '/' : $path) . "/");
         }
 
         /**
@@ -45,10 +46,10 @@
          *
          * @todo add possibility to get file extension of remote URLs which haven't a direct extension in the URL
          */
-        public static function getFileExtension ($file)
+        public static function getFileExtension ($file, $validityCheck = true)
         {
             $ext = null;
-            if (self::fileExists($file)) {
+            if (!$validityCheck || self::fileExists($file)) {
                 $arr = explode('.', basename($file));
                 $ext = array_pop($arr);
             }
@@ -63,13 +64,26 @@
          *
          * @return null|string
          */
-        public static function getFileContents (&$file, $fallback)
+        public static function getFileContents ($file, $fallback)
         {
             $content = null;
             if (self::fileExists($file))
                 $content = file_get_contents($file);
 
             return (!empty($content)) ? $content : $fallback;
+        }
+
+        /**
+         * output given $content to $file if its directory exists and the file is writable
+         *
+         * @param $file
+         * @param $content
+         */
+        public static function writeContentsToFile ($file, $content)
+        {
+            $dir = dirname($file);
+            if (self::dirExists($dir) && is_writable($dir))
+                file_put_contents($dir . '/' . basename($file), $content);
         }
 
         /**
@@ -82,6 +96,21 @@
         public static function fileExists (&$file)
         {
             return URLHelper::isValidURL($file) ? self::fileExistsAtURL($file) : file_exists(self::getFilePath($file));
+        }
+
+        /**
+         * checks if a file (may it be remote or local) exists
+         *
+         * @param $dir
+         *
+         * @return bool
+         */
+        public static function dirExists (&$dir)
+        {
+            if (URLHelper::isValidURL($dir))
+                return false;
+
+            return is_dir(dirname(self::getFilePath($dir)));
         }
 
         /**
@@ -116,6 +145,20 @@
 
             if (!URLHelper::isValidURL($file))
                 $file = realpath($file);
+
+            return $file;
+        }
+
+        public static function getMostCurrentFileByFileName ($dir, $fileNameOnly = true)
+        {
+            $file = null;
+            if (self::dirExists($dir)) {
+                $files = scandir($dir, SCANDIR_SORT_DESCENDING);
+                $file = (isset($files[0]) && $files[0] != '.' && $files[0] != '..') ? $files[0] : null;
+            }
+
+            if (isset($file) && !$fileNameOnly)
+                $file = self::getRelativePath($dir . '/') . $file;
 
             return $file;
         }
