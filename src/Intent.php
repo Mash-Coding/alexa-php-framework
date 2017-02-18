@@ -41,7 +41,7 @@
             $action = $this->getActionFromSlots();
             $rawAction = array_search(implode(',', array_keys($this->slots)), $this->registeredActions);
             if (isset($action))
-                $this->$action(ArrayHelper::getFilteredArray($this->data->actions->data()[lcfirst(substr($action, 6))], $this->slots));
+                $this->$action(ArrayHelper::getFilteredArray($this->data->actions->data()[lcfirst(substr($action, 6))], array_map(function ($a) { return $a["value"]; }, $this->slots)));
             else if ($rawAction)
                 throw new ResponseException(LocalizationHelper::localize("unknown value", ["type" => "action", "value" => $rawAction]));
             else
