@@ -18,6 +18,25 @@
             return strtr($string, []);
         }
 
+        public static function toCamelCase ($string, $filterWords = [])
+        {
+            global $filter, $i;
+            $i = 0;
+            $filter = $filterWords;
+            return implode('', array_map(function ($a) {
+                global $filter, $i;
+                $ret = $a;
+                if (!is_array($filter) || !in_array(strtolower($a), $filter))
+                    $ret = ($i > 0) ? ucfirst($a) : lcfirst($a);
+                $i++;
+                return $ret;
+            }, explode(' ', strtr($string, [
+                ':' => '',
+                '.' => '',
+                ',' => '',
+            ]))));
+        }
+
         public function __get ($name)
         {
             $value = null;
@@ -134,6 +153,20 @@
         public function __toString ()
         {
             return '';
+        }
+
+        public function render ($view, $ext = 'tpl', $removeWhitespace = false)
+        {
+            $Settings = SettingsHelper::getConfig();
+            $file = $Settings->path->views . $view . '.' . $ext;
+            $render = "";
+            if ($Settings->path->views && FileHelper::fileExists($file)) {
+                ob_start();
+                include $file;
+                $render = ob_get_clean();
+            }
+
+            return ($removeWhitespace) ? preg_replace('/[^\\S ]+/', '', $render) : $render;
         }
 
         /**
