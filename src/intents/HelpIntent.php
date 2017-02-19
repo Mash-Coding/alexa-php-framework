@@ -5,7 +5,7 @@
     use MashCoding\AlexaPHPFramework\helper\SSMLHelper as SSML;
     use MashCoding\AlexaPHPFramework\Intent;
 
-    class HelpIntent extends Intent
+    class HelpIntent extends Intent implements HelpIntentInterface
     {
         public function actionGetHelp ($slots)
         {
@@ -15,4 +15,8 @@
                     ->setTitle((is_string($this->Skill->help->title)) ? $this->Skill->help->title : "About the skill")
                     ->setText($this->Skill->help->text . (($this->Skill->help->examples->hasProperties()) ? PHP_EOL . PHP_EOL . "Usage examples:" . PHP_EOL . implode(PHP_EOL, $this->Skill->help->examples->data()) : ''));
         }
+    }
+
+    interface HelpIntentInterface {
+        public function actionGetHelp ($slots);
     }

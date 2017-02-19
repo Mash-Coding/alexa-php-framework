@@ -3,9 +3,13 @@
 
     use MashCoding\AlexaPHPFramework\Intent;
 
-    class StopIntent extends Intent
+    class StopIntent extends Intent implements StopIntentInterface
     {
         public function actionStop ($slots)
         {
         }
+    }
+
+    interface StopIntentInterface {
+        public function actionStop ($slots);
     }
