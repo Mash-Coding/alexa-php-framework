@@ -4,6 +4,7 @@
     use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
     use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
+    use MashCoding\AlexaPHPFramework\helper\ObjectHelper;
     use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
     use MashCoding\AlexaPHPFramework\Intent;
 
@@ -19,10 +20,11 @@
         {
             $Settings = SettingsHelper::getConfig();
             $class = $Settings->namespace->skills . $this->skill->alias . '\\intents\\' . ucfirst($this->skill->intent->intentClass) . 'Intent';
+            $fbClass = str_replace(ObjectHelper::getClassname(Intent::class), '', Intent::class) . 'intents\\' . ucfirst($this->skill->intent->intentClass) . 'Intent';
             if (!class_exists($class))
-                $class = Intent::class;
+                $class = (class_exists($fbClass)) ? $fbClass : Intent::class;
 
-            return new $class($this->Response, $this->skill->intent, $this->request->intent->slots->data());
+            return new $class($this->Response, $this->skill, $this->request->intent->slots->data());
         }
 
         /**

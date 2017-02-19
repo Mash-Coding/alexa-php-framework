@@ -6,6 +6,30 @@
     class ArrayHelper
     {
         /**
+         * @param array $source
+         * @param array $merge
+         *
+         * @return array
+         */
+        public static function merge ($source = [], $merge = [])
+        {
+            if (!is_array($source))
+                $source = [];
+
+            foreach ($merge as $key => $value) {
+                $source[$key] = (is_array($value)) ? self::merge($source[$key], $value) : $value;
+            };
+
+            for ($i = 2; $i < func_num_args(); ++$i) {
+                $moreMerge = func_get_arg($i);
+                if (is_array($moreMerge))
+                    $source = self::merge($source, $moreMerge);
+            };
+
+            return $source;
+        }
+
+        /**
          * checks if all keys from $needleArray are set in $haystack
          *
          * @param array $needleArray

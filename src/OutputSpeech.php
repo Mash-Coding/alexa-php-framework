@@ -2,6 +2,7 @@
     namespace MashCoding\AlexaPHPFramework;
 
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
+    use MashCoding\AlexaPHPFramework\helper\SSMLHelper;
 
     class OutputSpeech extends JSONObject
     {
@@ -35,7 +36,7 @@
             $responseType = self::getResponseType($message);
             parent::__construct([
                 "type" => $responseType,
-                 self::$RESPONSE_TYPE_PROPERTY[$responseType] => $message
+                 self::$RESPONSE_TYPE_PROPERTY[$responseType] => SSMLHelper::finalize($message)
             ]);
         }
 

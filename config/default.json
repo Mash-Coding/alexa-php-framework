@@ -16,11 +16,21 @@
 
   "skills": {},
 
-  "__example_config__": {
-    "skills": {
 
+  "__example_config__": {
+
+    "skills": {
       "skill_id": {
         "name": "Skill Name",
+        "invocationName": "skillname",
+        "help": {
+          "text": "",
+          "examples": ""
+        },
+
+        "examples": [
+          "Alexa, do stuff!"
+        ],
 
         "intents": {
           "intentName": {
@@ -30,10 +40,9 @@
             }
           }
         }
-
       }
-
     }
+
   }
 
 }

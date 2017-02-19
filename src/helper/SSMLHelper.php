@@ -29,7 +29,7 @@
                     '  ' => ' '
                 ]) . '</p>';
 
-            return self::finalize($string);
+            return $string;
         }
 
         public static function finalize ($string)

@@ -14,7 +14,7 @@
         public static function parseConfig ($file, $name = 'settings')
         {
             $Settings = self::getConfig($name);
-            $Settings->invokeData(array_merge($Settings->data(), FileHelper::parseJSON($file)));
+            $Settings->invokeData(ArrayHelper::merge($Settings->data(), FileHelper::parseJSON($file)));
             return $Settings;
         }
 

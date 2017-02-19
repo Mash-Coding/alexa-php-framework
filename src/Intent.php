@@ -11,22 +11,31 @@
         protected $registeredActions = [];
         protected $slots = [];
         protected $data;
+        /**
+         * @var Response
+         */
         protected $Response;
+        /**
+         * @var Skill
+         */
+        protected $Skill;
 
         /**
          * Intent constructor.
          *
          * @param Response   $Response
-         * @param JSONObject $intent
+         * @param Skill      $skill
          * @param array      $slots
          */
-        public function __construct (Response &$Response, JSONObject $intent, array $slots)
+        public function __construct (Response &$Response, Skill $skill, array $slots)
         {
+            $intent = $skill->intent;
             $this->registeredActions = array_map(function ($a) { $a = (is_string($a)) ? [$a] : $a; sort($a, SORT_NATURAL); return implode(',', $a); }, $intent->actions->data());
 
             ksort($slots, SORT_NATURAL);
             $this->slots = $slots;
 
+            $this->Skill = $skill;
             $this->data = $intent;
             $this->Response = $Response;
         }
@@ -75,5 +84,5 @@
     }
 
     interface IntentInterface {
-        public function __construct (Response &$Response, JSONObject $intent, array $slots);
+        public function __construct (Response &$Response, Skill $skill, array $slots);
     }

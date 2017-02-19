@@ -1,6 +1,7 @@
 <?php
     namespace MashCoding\AlexaPHPFramework;
 
+    use MashCoding\AlexaPHPFramework\helper\ArrayHelper;
     use MashCoding\AlexaPHPFramework\helper\FileHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
     use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
@@ -8,8 +9,17 @@
 
     class Skill extends JSONObject
     {
+        const INTENT_AMAZON_HELP = 'AMAZON.HelpIntent';
+        const INTENT_AMAZON_STOP = 'AMAZON.StopIntent';
+
         private static $BASE_STRUCTURE = [
             "name" => "",
+            "help" => [
+                "text" => "This is a description for this skill!",
+                "examples" => [
+                    "Alexa, ask for help"
+                ],
+            ],
             "alias" => "",
             "skillId" => "",
             "intents" => [],
@@ -52,15 +62,31 @@
         public function intent ($name)
         {
             if (!$this->__intent || !$this->__intent->hasProperties())
-                $this->__intent = ($this->intents->hasProperties() && $this->intents->hasProperty($name)) ? $this->intents->$name->invokeData(array_merge(self::$BASE_INTENT, $this->intents->$name->data(), ["name" => $name])) : null;
+                $this->__intent = ($this->intents->hasProperties() && $this->intents->hasProperty($name)) ? $this->intents->$name->invokeData(ArrayHelper::merge(self::$BASE_INTENT, $this->intents->$name->data(), ["name" => $name])) : null;
 
             return $this->__intent;
         }
 
         public function __construct ($skillId, array $data)
         {
-            parent::__construct(array_merge(self::$BASE_STRUCTURE, $data, [
+            parent::__construct(ArrayHelper::merge(self::$BASE_STRUCTURE, $data, [
                 "skillId" => $skillId,
+
+                // default amazon intent invoke
+                "intents" => [
+                    self::INTENT_AMAZON_HELP => [
+                        "intentClass" => "Help",
+                        "actions" => [
+                            "getHelp" => [],
+                        ],
+                    ],
+                    self::INTENT_AMAZON_STOP => [
+                        "intentClass" => "Stop",
+                        "actions" => [
+                            "stop" => [],
+                        ],
+                    ],
+                ],
             ]));
             $this->getAlias();
 
