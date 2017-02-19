@@ -3,6 +3,7 @@
     "root": "/",
     "public" : "/web/",
     "locale": "/lang/",
+    "views": "/views/",
     "skills": "/src/"
   },
 
