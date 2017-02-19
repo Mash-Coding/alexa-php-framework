@@ -16,14 +16,15 @@
          * parses a $string by \n into a valid SSML-syntaxed message
          *
          * @param $string
+         * @param bool|array $localize
          *
          * @return string
          *
          * @see https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference
          */
-        public static function say ($string)
+        public static function say ($string, $localize = false)
         {
-            $string = '<p>' . strtr($string, [
+            $string = '<p>' . strtr(($localize) ? LocalizationHelper::localize($string, (is_array($localize)) ? $localize : []) : $string, [
                     self::BREAK_HARD => '</p><p>',
                     self::BREAK_SOFT => PHP_EOL,
                     '  ' => ' '

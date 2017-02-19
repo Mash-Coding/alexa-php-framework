@@ -36,7 +36,7 @@
             $responseType = self::getResponseType($message);
             parent::__construct([
                 "type" => $responseType,
-                 self::$RESPONSE_TYPE_PROPERTY[$responseType] => SSMLHelper::finalize($message)
+                 self::$RESPONSE_TYPE_PROPERTY[$responseType] => ($responseType == self::RESPONSE_TYPE_SSML) ? SSMLHelper::finalize($message) : $message,
             ]);
         }
 

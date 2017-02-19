@@ -56,7 +56,7 @@
 
             $search = array_map(function ($a) { return '{{' . $a . '}}'; }, array_keys($properties));
             $replace = array_values($properties);
-            $message = ($Localization->hasProperty($message)) ? str_replace($search, $replace, $Localization->$message) : $message;
+            $message = str_replace($search, $replace, ($Localization->hasProperty($message)) ? $Localization->$message : $message);
             return $message;
         }
 
