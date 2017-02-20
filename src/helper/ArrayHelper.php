@@ -17,7 +17,7 @@
                 $source = [];
 
             foreach ($merge as $key => $value) {
-                $source[$key] = (is_array($value)) ? self::merge($source[$key], $value) : $value;
+                $source[$key] = (is_array($value) && isset($source[$key])) ? self::merge($source[$key], $value) : $value;
             };
 
             for ($i = 2; $i < func_num_args(); ++$i) {
@@ -101,7 +101,7 @@
                             if ($type == "language" && $valid)
                                 $valid = LocalizationHelper::isValidLocale($value);
                         break;
-                        
+
                         default:
                             $valid = isset($value);
                     };
