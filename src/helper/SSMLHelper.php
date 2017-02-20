@@ -41,6 +41,13 @@
             return $string;
         }
 
+        public static function getBeginningSentences ($string, $numSentences = 3)
+        {
+            preg_match_all('/(.*?[?!.”´`](?=\s|$))/', $string, $sentences);
+
+            return implode(' ', array_map('trim', array_slice($sentences[0], 0, $numSentences)));
+        }
+
         /**
          * outputs a list as valid SSML (with seperators and such)
          *
