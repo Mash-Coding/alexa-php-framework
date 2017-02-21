@@ -26,12 +26,8 @@
         "invocationName": "skillname",
         "help": {
           "text": "",
-          "examples": ""
+          "examples": []
         },
-
-        "examples": [
-          "Alexa, do stuff!"
-        ],
 
         "intents": {
           "intentName": {
