@@ -133,7 +133,7 @@
                 SettingsHelper::parseConfig(FileHelper::getRelativePath(__DIR__ . '/../config/') . "default.json");
                 SettingsHelper::parseConfig((isset($configFile)) ? $configFile : '/config/alexa.json');
 
-                $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request($stdinOverride);
+                $AlexaRequest  = new \MashCoding\AlexaPHPFramework\Request((defined('DEBUG') && DEBUG) ? $stdinOverride : null);
                 $AlexaResponse = \MashCoding\AlexaPHPFramework\Response::fromRequest($AlexaRequest);
 
                 try {
