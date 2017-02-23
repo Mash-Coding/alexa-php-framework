@@ -7,6 +7,15 @@
     "skills": "/src/"
   },
 
+  "acceptedSignatures": {
+    "echo-api.amazon.com": {
+      "scheme"   : "https",
+      "host"     : "s3.amazonaws.com",
+      "pathStart": "^/echo\\.api/.",
+      "?port"     : 443
+    }
+  },
+
   "namespace": {
     "skills": "\\app\\skills\\"
   },

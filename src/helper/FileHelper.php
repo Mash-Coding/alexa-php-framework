@@ -25,6 +25,17 @@
             return str_replace(self::getRoot(), "/", realpath((!is_dir($path)) ? dirname($path) . '/' : $path) . "/");
         }
 
+        public static function getPublicPath ($path, $absolute = false)
+        {
+            self::getFilePath($path);
+
+            $Settings = SettingsHelper::getConfig();
+            return (($absolute) ? '//' . $_SERVER['HTTP_HOST'] : '') . strtr($path, [
+                self::getRoot() => '/',
+                $Settings->path->public => '/',
+            ]);
+        }
+
         /**
          * parses the specified JSON $file if it exists
          *
@@ -140,8 +151,9 @@
          */
         public static function getFilePath (&$file)
         {
-            if (substr($file, 0, 1) == '/')
-                $file = FileHelper::getRoot() . substr($file, 1);
+            $root = FileHelper::getRoot();
+            if (substr($file, 0, strlen($root)) != $root && substr($file, 0, 1) == '/')
+                $file = $root . substr($file, 1);
 
             if (!URLHelper::isValidURL($file))
                 $file = realpath($file);
