@@ -36,6 +36,17 @@
             ]);
         }
 
+        public static function getFileName ($path)
+        {
+            if (URLHelper::isValidURL($path)) {
+                $arr = explode('/', $path);
+                $name = array_pop($arr);
+            } else {
+                $name = basename($path);
+            }
+            return $name;
+        }
+
         /**
          * parses the specified JSON $file if it exists
          *

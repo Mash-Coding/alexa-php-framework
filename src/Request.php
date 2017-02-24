@@ -12,6 +12,7 @@
     use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
     use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
     use MashCoding\AlexaPHPFramework\helper\URLHelper;
+    use phpseclib\File\X509;
     use SebastianBergmann\CodeCoverage\Report\Html\File;
 
     class Request extends JSONObject
@@ -120,7 +121,6 @@
 
             $Settings = SettingsHelper::getConfig();
 
-            global $validate;
             $validate = (DEBUG) ? FileHelper::parseJSON('/dev/amazon_request/amazon_request_header_example.json') : $_SERVER;
             if (!isset($validate['HTTP_SIGNATURECERTCHAINURL']))
                 throw new SignatureException(401, "HTTP_SIGNATURECERTCHAINURL not set in http header");
@@ -146,32 +146,44 @@
             if (DEBUG)
                 $certFile = '/dev/amazon_request/echo-api-cert-4.pem';
 
+            $certs = null;
             try {
                 $certs = CertHelper::checkCertificate($certFile, $validate['HTTP_SIGNATURE']);
             } catch (CertificateException $e) {
                 throw new SignatureException(400, $e->getMessage());
             }
 
-            exit;
-
-            // TODO [marcel, 23.02.2017]: check chain of trust up to the root CA
-
-            $certDetails = $certs[0];
-            $anyValidName = false;
-            foreach (array_keys($Settings->acceptedSignatures->data()) as $signatureURL) {
-                if (strpos($certDetails['extensions']['subjectAltName'], $signatureURL) !== false) {
-                    $anyValidName = true;
-                    break;
-                }
-            };
-            if (!$anyValidName)
-                throw new SignatureException(400, "Subject Alternative Name '" . $certDetails['extensions']['subjectAltName'] . "' is not valid");
+            if (!isset($certs) || !count($certs))
+                throw new SignatureException(401, "no certificates given");
 
 
+            // at this point the certificates are valid :)
+            /**
+             * @var $signedCertificate X509
+             */
+            $signedCertificate = $certs[0];
 
-            var_dump($certContent, $certPublicKey, $signature, $certValid); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
+            // Once you have determined that the signing certificate is valid, extract the public key from it.
+            $pubKey = $signedCertificate->getPublicKey();
 
-            exit;
+            // Base64-decode the Signature header value on the request to obtain the encrypted signature.
+            $encryptedSignature = base64_decode($validate['HTTP_SIGNATURE']);
+
+            // Use the public key extracted from the signing certificate to decrypt the encrypted signature to produce the asserted hash value.
+            if (!openssl_public_decrypt($encryptedSignature, $signatureHash, $pubKey))
+                throw new SignatureException(401, "an error occurred while decrypting the given signature");
+
+            $signatureHash = bin2hex($signatureHash);
+            if (substr($signatureHash, 0, strlen(CertHelper::SHA1_BYTES)) != CertHelper::SHA1_BYTES)
+                throw new SignatureException(400, "signature is not encrypted with SHA-1");
+            $signatureHash = substr($signatureHash, strlen(CertHelper::SHA1_BYTES));
+
+            // Generate a SHA-1 hash value from the full HTTPS request body to produce the derived hash value
+            $hashedRequest = sha1($input);
+
+            // Compare the asserted hash value and derived hash values to ensure that they match.
+            if ($signatureHash != $hashedRequest)
+                throw new SignatureException(400, "hashes do not match");
 
             $input = array_merge(self::$BASE_REQUEST, json_decode($input, true));
 

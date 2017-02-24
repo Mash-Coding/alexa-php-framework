@@ -2,9 +2,13 @@
     namespace MashCoding\AlexaPHPFramework\helper;
 
     use MashCoding\AlexaPHPFramework\exceptions\CertificateException;
+    use phpseclib\File\X509;
+    use SebastianBergmann\CodeCoverage\Report\Html\File;
 
     class CertHelper
     {
+        const SHA1_BYTES = '3021300906052b0e03021a05000414';
+
         public static function getCertificate ($certFile)
         {
             // Download the PEM-encoded X.509 certificate chain that Alexa used to sign the message as specified by the SignatureCertChainUrl header value on the request.
@@ -17,79 +21,110 @@
             return $certContent;
         }
 
-        public static function validateBasicCertificateDetails ($cert)
-        {
-            // The signing certificate has not expired (examine both the Not Before and Not After dates)
-            // The domain echo-api.amazon.com is present in the Subject Alternative Names (SANs) section of the signing certificate
-            $cert = openssl_x509_parse($cert);
-            if (!$cert || !count($cert))
-                throw new CertificateException("certificate invalid");
-
-            $time = time();
-            if (!ArrayHelper::areKeysSet(['validFrom_time_t', 'validTo_time_t', 'extensions'], $cert))
-                throw new CertificateException("certificate invalid");
-            else if ($time < $cert['validFrom_time_t'] || $time > $cert['validTo_time_t'])
-                throw new CertificateException("certificate has expired");
-            else if (!isset($cert['extensions']['subjectAltName']))
-                throw new CertificateException("no Subject Alternative Name in certificate provided");
-
-            return $cert;
-        }
-
-        protected static function isRootCA (array $certDetails)
-        {
-            return $certDetails['issuer'] === ArrayHelper::getFilteredArray(array_keys($certDetails['issuer']), $certDetails['subject']);
-        }
-
         protected static function getCertificatesChainOfTrust ($chainOfTrust)
         {
             preg_match_all('/(?<=-----BEGIN CERTIFICATE-----)(?:\S+|\s(?!-----END CERTIFICATE-----))+(?=\s-----END CERTIFICATE-----)/', $chainOfTrust, $certs);
             return array_map(function ($cert) { return "-----BEGIN CERTIFICATE-----\n" . trim($cert) . "\n-----END CERTIFICATE-----"; }, $certs[0]);
         }
 
-        public static function validateCertificate ($certContent, array $certDetails)
+        protected static function getImmediateCertificate (X509 $X509)
         {
-            global $validate;
-            var_dump($certDetails); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
+            $extension = $X509->getExtension('id-pe-authorityInfoAccess');
+            if (isset($extension)) {
+                foreach ($extension as $extnValue) {
+                    if ($extnValue['accessMethod'] == 'id-ad-caIssuers')
+                        return $extnValue['accessLocation']['uniformResourceIdentifier'];
+                };
+            }
+            return null;
+        }
 
-            $time = time();
-            if ($time < $certDetails['validFrom_time_t'] || $time > $certDetails['validTo_time_t'])
-                throw new CertificateException("certificate has expired");
+        protected static function getSubjectAlternativeNames (X509 $X509, $nameOnly = false)
+        {
+            $names = [];
+            $extension = $X509->getExtension('id-ce-subjectAltName');
+            if (isset($extension)) {
+                foreach ($extension as $extnValue) {
+                    if (isset($extnValue['dNSName']))
+                        $names[] = $extnValue['dNSName'];
+                };
+            }
 
-            $certPublicKey = openssl_pkey_get_public($certContent);
-            if (!$certPublicKey)
-                throw new CertificateException("certificate is not a valid one");
+            return $names;
+        }
 
-            $signature = base64_decode($validate['HTTP_SIGNATURE']);
-
-            $certValid = openssl_verify($certContent, $signature, $certPublicKey);
-
-            var_dump($signature, $certValid); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            
-            return true;
+        protected static function compareCertificateSignatures ($cert1Content, $cert2Content)
+        {
+            $X509 = new X509();
+            $cert1 = $X509->loadX509($cert1Content);
+            $cert2 = $X509->loadX509($cert2Content);
+            return $cert1['signature'] === $cert2['signature'];
         }
 
         public static function verifyCertificate ($certContent)
         {
+            $Settings = SettingsHelper::getConfig();
+            $Certificates = self::getLoadedCertificates();
+
             $certs = self::getCertificatesChainOfTrust($certContent);
-            foreach ($certs as $pos => &$cert) {
-                $raw = $cert;
-                $cert = self::validateBasicCertificateDetails($cert);
+            $X509 = new X509();
+            foreach ($certs as $pos => $certData) {
+                $cert = $X509->loadX509($certData);
 
-                if (!self::validateCertificate($raw, $cert))
-                    throw new CertificateException("invalid " . (($pos == 0) ? 'initial' : 'intermediate') . " certificate provided");
+                // The signing certificate has not expired (examine both the Not Before and Not After dates)
+                if (!$X509->validateDate())
+                    throw new CertificateException("certificate has expired");
 
-                if (self::isRootCA($cert) && $pos !== count($certs)-1)
-                    throw new CertificateException("invalid chain of trust");
+                // The domain echo-api.amazon.com is present in the Subject Alternative Names (SANs) section of the signing certificate
+                if ($pos == 0) {
+                    $anyValidName = false;
+                    $subjectAltNames = self::getSubjectAlternativeNames($X509);
+                    foreach (array_keys($Settings->acceptedSignatures->data()) as $signatureURL) {
+                        if (in_array($signatureURL, $subjectAltNames)) {
+                            $anyValidName = true;
+                            break;
+                        }
+                    };
+                    if (!$anyValidName)
+                        throw new CertificateException("Subject Alternative Names '" . implode(', ', $subjectAltNames) . "' of '" . $Certificates->getProperty($pos) . "' are not valid");
+                }
+
+                // All certificates in the chain combine to create a chain of trust to a trusted root CA certificate
+                $caCertFile = self::getImmediateCertificate($X509);
+                if ($pos < count($certs)-1) {
+                    if (!$caCertFile)
+                        throw new CertificateException("certificate '" . $Certificates->getProperty($pos) . "' is required to have immediate certificate");
+
+                    $caCert = FileHelper::getFileContents((DEBUG) ? '/dev/amazon_request/' . FileHelper::getFileName($caCertFile) : $caCertFile, null);
+                    if (!$caCert)
+                        throw new CertificateException("invalid certificate signer '" . FileHelper::getFileName($caCertFile) . "'");
+                    else if (isset($certs[$pos + 1]) && !self::compareCertificateSignatures($caCert, $certs[$pos + 1]))
+                        throw new CertificateException("immediate certificate '" . FileHelper::getFileName($caCertFile) . "' does not fit in chain of trust");
+
+                    $X509->loadCA($caCert);
+
+                    if (!$X509->validateSignature())
+                        throw new CertificateException("certificate '" . $Certificates->getProperty($pos) . "' has invalid signature");
+
+                    $Certificates->push(FileHelper::getFileName(self::getImmediateCertificate($X509)));
+                }
+                $certs[$pos] = clone $X509;
             };
 
             return $certs;
         }
 
+        public static function getLoadedCertificates ()
+        {
+            return DataHandler::getDataObject()->certs;
+        }
+
         public static function checkCertificate ($certFile, $signature = null)
         {
-            $certContent = self::getCertificate($certFile);
+            $Certificates = self::getLoadedCertificates();
+            $Certificates->push(basename($certFile));
 
+            $certContent = self::getCertificate($certFile);
             return self::verifyCertificate($certContent);
         }
     }
