@@ -2,7 +2,8 @@
   "name": "mash-coding/alexa-php-framework",
   "description": "A simple framework to work with Amazon Echo API",
   "require": {
-    "php": "^5.4 || ^7.0"
+    "php": "^5.4 || ^7.0",
+    "phpseclib/phpseclib": "^2.0"
   },
   "repositories": [
     {

@@ -1,9 +1,11 @@
 <?php
     namespace MashCoding\AlexaPHPFramework;
 
+    use MashCoding\AlexaPHPFramework\exceptions\CertificateException;
     use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
     use MashCoding\AlexaPHPFramework\exceptions\SignatureException;
     use MashCoding\AlexaPHPFramework\helper\ArrayHelper;
+    use MashCoding\AlexaPHPFramework\helper\CertHelper;
     use MashCoding\AlexaPHPFramework\helper\DataHandler;
     use MashCoding\AlexaPHPFramework\helper\FileHelper;
     use MashCoding\AlexaPHPFramework\helper\JSONObject;
@@ -118,6 +120,7 @@
 
             $Settings = SettingsHelper::getConfig();
 
+            global $validate;
             $validate = (DEBUG) ? FileHelper::parseJSON('/dev/amazon_request/amazon_request_header_example.json') : $_SERVER;
             if (!isset($validate['HTTP_SIGNATURECERTCHAINURL']))
                 throw new SignatureException(401, "HTTP_SIGNATURECERTCHAINURL not set in http header");
@@ -143,39 +146,17 @@
             if (DEBUG)
                 $certFile = '/dev/amazon_request/echo-api-cert-4.pem';
 
-            // Download the PEM-encoded X.509 certificate chain that Alexa used to sign the message as specified by the SignatureCertChainUrl header value on the request.
-            if (!FileHelper::fileExists($certFile))
-                throw new SignatureException(401, $certFile . " does not exist");
+            try {
+                $certs = CertHelper::checkCertificate($certFile, $validate['HTTP_SIGNATURE']);
+            } catch (CertificateException $e) {
+                throw new SignatureException(400, $e->getMessage());
+            }
 
-            $certContent = FileHelper::getFileContents($certFile, null);
-            if (!trim($certContent))
-                throw new SignatureException(400, "certificate-file empty");
-
-
-            // The signing certificate has not expired (examine both the Not Before and Not After dates)
-            // The domain echo-api.amazon.com is present in the Subject Alternative Names (SANs) section of the signing certificate
-            $certDetails = openssl_x509_parse($certContent);
-            if (!$certDetails || !count($certDetails))
-                throw new SignatureException(400, "certificate invalid");
-
-            $time = time();
-            if (!ArrayHelper::areKeysSet(['validFrom_time_t', 'validTo_time_t', 'extensions'], $certDetails))
-                throw new SignatureException(400, "certificate invalid");
-            else if ($time < $certDetails['validFrom_time_t'] || $time > $certDetails['validTo_time_t'])
-                throw new SignatureException(400, "certificate has expired");
-            else if (!isset($certDetails['extensions']['subjectAltName']))
-                throw new SignatureException(400, "no Subject Alternative Name in certificate provided");
-
+            exit;
 
             // TODO [marcel, 23.02.2017]: check chain of trust up to the root CA
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_SSL_CLIENT)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_SSL_SERVER)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_NS_SSL_SERVER)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_SMIME_SIGN)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_SMIME_ENCRYPT)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_CRL_SIGN)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
-            var_dump(openssl_x509_checkpurpose($certContent, X509_PURPOSE_ANY)); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
 
+            $certDetails = $certs[0];
             $anyValidName = false;
             foreach (array_keys($Settings->acceptedSignatures->data()) as $signatureURL) {
                 if (strpos($certDetails['extensions']['subjectAltName'], $signatureURL) !== false) {
@@ -186,17 +167,7 @@
             if (!$anyValidName)
                 throw new SignatureException(400, "Subject Alternative Name '" . $certDetails['extensions']['subjectAltName'] . "' is not valid");
 
-            $time = time();
-            if ($time < $certDetails['validFrom_time_t'] || $time > $certDetails['validTo_time_t'])
-                throw new SignatureException(400, "certificate has expired");
 
-            $certPublicKey = openssl_pkey_get_public($certContent);
-            if (!$certPublicKey)
-                throw new SignatureException(401, "certificate is not a valid one");
-
-            $signature = base64_decode($validate['HTTP_SIGNATURE']);
-
-            $certValid = openssl_verify($certContent, $signature, $certPublicKey);
 
             var_dump($certContent, $certPublicKey, $signature, $certValid); print ' in ' . __FILE__ . '::' . __LINE__ . PHP_EOL . PHP_EOL;
 
