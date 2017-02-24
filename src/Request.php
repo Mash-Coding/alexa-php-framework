@@ -21,6 +21,8 @@
         const TYPE_LAUNCH = "LaunchRequest";
         const TYPE_SESSION_END = "SessionEndRequest";
 
+        const TIME_TOLERANCE = 150; // after 150 seconds, the request is expired
+
         public static $VALID_TYPES = [
             self::TYPE_INTENT, self::TYPE_LAUNCH, self::TYPE_SESSION_END,
         ];
@@ -166,8 +168,10 @@
             // Once you have determined that the signing certificate is valid, extract the public key from it.
             $pubKey = $signedCertificate->getPublicKey();
 
+
             // Base64-decode the Signature header value on the request to obtain the encrypted signature.
             $encryptedSignature = base64_decode($validate['HTTP_SIGNATURE']);
+
 
             // Use the public key extracted from the signing certificate to decrypt the encrypted signature to produce the asserted hash value.
             if (!openssl_public_decrypt($encryptedSignature, $signatureHash, $pubKey))
@@ -178,19 +182,27 @@
                 throw new SignatureException(400, "signature is not encrypted with SHA-1");
             $signatureHash = substr($signatureHash, strlen(CertHelper::SHA1_BYTES));
 
+
             // Generate a SHA-1 hash value from the full HTTPS request body to produce the derived hash value
             $hashedRequest = sha1($input);
+
 
             // Compare the asserted hash value and derived hash values to ensure that they match.
             if ($signatureHash != $hashedRequest)
                 throw new SignatureException(400, "hashes do not match");
 
             $input = array_merge(self::$BASE_REQUEST, json_decode($input, true));
-
             ArrayHelper::validateArrayScheme(self::$REQUEST_SCHEME, $input);
+
+
+            // Your service should allow a tolerance of no more than 150 seconds (two and a half minutes).
+            // This means that your service should only accept requests in which the request timestamp is within 150 seconds of the current time.
+            if (!DEBUG && new \DateTime($input['request']['timestamp']) < new \DateTime("-" . self::TIME_TOLERANCE . " seconds"))
+                throw new SignatureException(400, "request has expired");
 
             LocalizationHelper::validateLocale($input['request']['locale']);
 
+            exit;
             return true;
         }
 
