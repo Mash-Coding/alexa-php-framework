@@ -4,7 +4,8 @@
     "public" : "/web/",
     "locale": "/lang/",
     "views": "/views/",
-    "skills": "/src/"
+    "skills": "/src/",
+    "cache": "/cache/"
   },
 
   "acceptedSignatures": {

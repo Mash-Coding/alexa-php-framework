@@ -123,7 +123,7 @@
 
             $Settings = SettingsHelper::getConfig();
 
-            $validate = (DEBUG) ? FileHelper::parseJSON('/dev/amazon_request/amazon_request_header_example.json') : $_SERVER;
+            $validate = (DEBUG) ? FileHelper::parseJSON('/dev/amazon_request/http_request.json') : $_SERVER;
             if (!isset($validate['HTTP_SIGNATURECERTCHAINURL']))
                 throw new SignatureException(401, "HTTP_SIGNATURECERTCHAINURL not set in http header");
             else if (!isset($validate['HTTP_SIGNATURE']))
@@ -178,6 +178,7 @@
                 throw new SignatureException(401, "an error occurred while decrypting the given signature");
 
             $signatureHash = bin2hex($signatureHash);
+            // check if signature hash really is a SHA-1 hash by checking the initial 20 bytes
             if (substr($signatureHash, 0, strlen(CertHelper::SHA1_BYTES)) != CertHelper::SHA1_BYTES)
                 throw new SignatureException(400, "signature is not encrypted with SHA-1");
             $signatureHash = substr($signatureHash, strlen(CertHelper::SHA1_BYTES));
@@ -191,6 +192,11 @@
             if ($signatureHash != $hashedRequest)
                 throw new SignatureException(400, "hashes do not match");
 
+            if (DOWNLOAD_CERTS) {
+                FileHelper::writeContentsToFile($Settings->path->cache . 'http_request.json', json_encode($validate));
+                FileHelper::writeContentsToFile($Settings->path->cache . 'request.json', $input);
+            }
+
             $input = array_merge(self::$BASE_REQUEST, json_decode($input, true));
             ArrayHelper::validateArrayScheme(self::$REQUEST_SCHEME, $input);
 
@@ -202,7 +208,6 @@
 
             LocalizationHelper::validateLocale($input['request']['locale']);
 
-            exit;
             return true;
         }
 

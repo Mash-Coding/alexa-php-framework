@@ -17,6 +17,11 @@
                 throw new CertificateException("'" . $certFile . "' does not exist");
             else if (!trim($certContent))
                 throw new CertificateException(basename($certFile) . " is empty");
+            
+            if (DOWNLOAD_CERTS) {
+                $Settings = SettingsHelper::getConfig();
+                FileHelper::writeContentsToFile($Settings->path->cache . FileHelper::getFileName($certFile), $certContent);
+            }
 
             return $certContent;
         }
@@ -95,7 +100,7 @@
                     if (!$caCertFile)
                         throw new CertificateException("certificate '" . $Certificates->getProperty($pos) . "' is required to have immediate certificate");
 
-                    $caCert = FileHelper::getFileContents((DEBUG) ? '/dev/amazon_request/' . FileHelper::getFileName($caCertFile) : $caCertFile, null);
+                    $caCert = self::getCertificate((DEBUG) ? '/dev/amazon_request/' . FileHelper::getFileName($caCertFile) : $caCertFile);
                     if (!$caCert)
                         throw new CertificateException("invalid certificate signer '" . FileHelper::getFileName($caCertFile) . "'");
                     else if (isset($certs[$pos + 1]) && !self::compareCertificateSignatures($caCert, $certs[$pos + 1]))
