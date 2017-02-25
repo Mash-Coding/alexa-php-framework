@@ -105,6 +105,46 @@
         }
 
         /**
+         * compares key identifiers and issuer/subject DN to find out of certificate is self-signed
+         *
+         * @param X509 $X509
+         *
+         * @return bool
+         */
+        public static function isSelfSigned (X509 $X509)
+        {
+            $authorityKeyIdentifier = $X509->getExtension('id-ce-authorityKeyIdentifier');
+            if (isset($authorityKeyIdentifier))
+                $authorityKeyIdentifier = $authorityKeyIdentifier['keyIdentifier'];
+
+            $subjectKeyIdentifier = $X509->getExtension('id-ce-subjectKeyIdentifier');
+
+            return ($authorityKeyIdentifier === $subjectKeyIdentifier && $X509->getIssuerDN(X509::DN_HASH) == $X509->getDN(X509::DN_HASH));
+        }
+
+        /**
+         * this method will try to check the given $certContent with openssl command to find out if its trusted
+         *
+         * @param $certContent
+         *
+         * @return bool
+         */
+        public static function isIssuedByTrustedCA ($certContent)
+        {
+            $Settings = SettingsHelper::getConfig();
+            $i = 0;
+            $file = $Settings->path->cache . 'tmp_' . (int)(microtime(true)*1000) . '-' . $i . '.crt';
+            while (FileHelper::fileExists($file)) {
+                $file = $Settings->path->cache . explode('-', FileHelper::getFileName($file))[0] . '-' . ++$i . '.crt';
+            };
+
+            FileHelper::writeContentsToFile($file, $certContent);
+            $res = (exec("openssl verify " . $file) == $file . ': OK');
+            @unlink($file);
+            return !!$res;
+        }
+
+        /**
          * verifies a given certificate string by splitting it into single certificates (if its a chained certificate)
          * and then iterates through all certificates and validates for each of it:
          *  - has the certificate expired?
@@ -145,6 +185,11 @@
                     };
                     if (!$anyValidName)
                         throw new CertificateException("Subject Alternative Names '" . implode(', ', $subjectAltNames) . "' of '" . $Certificates->getProperty($pos) . "' are not valid");
+                } else {
+                    // is certificate authority allowed to be one
+                    $basicConstraints = $X509->getExtension('id-ce-basicConstraints');
+                    if (!isset($basicConstraints['cA']) || !$basicConstraints['cA'])
+                        throw new CertificateException("certificate authority is not approved");
                 }
 
                 // All certificates in the chain combine to create a chain of trust to a trusted root CA certificate
@@ -159,16 +204,27 @@
                     else if (isset($certs[$pos + 1]) && !self::compareCertificateSignatures($caCert, $certs[$pos + 1]))
                         throw new CertificateException("immediate certificate '" . FileHelper::getFileName($caCertFile) . "' does not fit in chain of trust");
 
+                    $caX509 = new X509();
+                    $caX509->loadX509($caCert);
+                    if ($caX509->getDN(X509::DN_HASH) != $X509->getIssuerDN(X509::DN_HASH))
+                        throw new CertificateException("issuer of certificate " . $Certificates->getProperty($pos) . " does not match given CA certificate");
+
                     $X509->loadCA($caCert);
 
                     if (!$X509->validateSignature())
-                        throw new CertificateException("certificate '" . $Certificates->getProperty($pos) . "' has invalid signature");
+                        throw new CertificateException("certificate " . $Certificates->getProperty($pos) . " is not valid");
 
                     $Certificates->push(FileHelper::getFileName(self::getImmediateCertificate($X509)));
+                } else {
+                    if (!self::isSelfSigned($X509) && !self::isIssuedByTrustedCA($certData))
+                        throw new CertificateException("last certificate in chain, " . $Certificates->getProperty($pos) . ", is not issued by a trusted CA");
+                    else if (self::isSelfSigned($X509) && !$X509->validateSignature(true))
+                        throw new CertificateException("last certificate in chain, " . $Certificates->getProperty($pos) . ", is not a valid root certificate");
                 }
                 $certs[$pos] = clone $X509;
             };
 
+            $Certificates->clear();
             return $certs;
         }
 
