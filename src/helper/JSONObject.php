@@ -150,6 +150,11 @@
             return json_encode($this->data(), $options);
         }
 
+        public function clear ()
+        {
+            $this->__data = [];
+        }
+
         public function __toString ()
         {
             return '';
