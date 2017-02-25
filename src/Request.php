@@ -118,7 +118,7 @@
          */
         private static function validateRequest (&$input)
         {
-            if (empty($input))
+            if (!isset($input) || !$input || empty($input))
                 throw new SignatureException(400, "empty stdin");
 
             $Settings = SettingsHelper::getConfig();
@@ -266,6 +266,9 @@
         {
             if (!isset($stdin) || empty($stdin))
                 $stdin = file_get_contents('php://input');
+
+            if (!isset($stdin) || empty($stdin))
+                throw new SignatureException(401, "invalid stdin");
 
             DataHandler::getDataObject()->stdin = $stdin;
             if ($stdin && self::validateRequest($stdin))
