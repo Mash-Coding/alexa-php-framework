@@ -166,7 +166,7 @@
             if (substr($file, 0, strlen($root)) != $root && substr($file, 0, 1) == '/')
                 $file = $root . substr($file, 1);
 
-            if (!URLHelper::isValidURL($file))
+            if (!URLHelper::isValidURL($file) && realpath($file))
                 $file = realpath($file);
 
             return $file;
