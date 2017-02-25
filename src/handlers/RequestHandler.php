@@ -2,6 +2,7 @@
     namespace MashCoding\AlexaPHPFramework\handlers;
 
     use MashCoding\AlexaPHPFramework\exceptions\ResponseException;
+    use MashCoding\AlexaPHPFramework\exceptions\SignatureException;
     use MashCoding\AlexaPHPFramework\helper\LocalizationHelper;
     use MashCoding\AlexaPHPFramework\helper\ObjectHelper;
     use MashCoding\AlexaPHPFramework\helper\SettingsHelper;
@@ -36,6 +37,8 @@
                         $Settings = SettingsHelper::getConfig();
                         if ($Settings->skills->hasProperty($skillId))
                             $val = new Skill($skillId, $Settings->skills->$skillId->data());
+                        else
+                            throw new SignatureException(400, "skill is not registered as valid skill");
 
                         $this->__skill = $val;
                     }
