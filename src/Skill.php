@@ -49,7 +49,9 @@
          */
         private function getAlias ()
         {
-            $this->alias = (is_string($this->alias) && $this->alias) ? $this->alias : str_replace('-', '_', FileHelper::makeConformName($this->name ?: $this->skillId));
+            $this->alias = strtr((is_string($this->alias) && $this->alias) ? $this->alias : FileHelper::makeConformName($this->name ?: $this->skillId), [
+                "-" => "_",
+            ]);
         }
 
         /**
